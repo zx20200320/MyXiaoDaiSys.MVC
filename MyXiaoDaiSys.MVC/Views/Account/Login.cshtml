@@ -1,0 +1,77 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/bootstrap.js"></script>
+</head>
+<body>
+    <div class="container">
+        <table class="table">
+            <tr>
+                <td colspan="2">
+                    登陆
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    用户名
+                </td>
+                <td>
+                    <input type="text" id="Name" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    密码
+                </td>
+                <td>
+                    <input type="password" id="Pass" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <input type="button" value="登陆"  onclick="login()"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script>
+        function login() {
+            var name = $("#Name").val();
+            var pass = $("#Pass").val();
+            if (name == "") {
+                alert("账号不能为空");
+                return;
+            }
+            if (pass == "") {
+                alert("密码不能为空");
+                return;
+            }
+
+            $.ajax({
+                url: 'http://localhost:55379/api/UserInfo/Login',
+                type: 'get',
+                data: { name: name, pass: pass },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.Code == 0) {
+                        localStorage["user"] = data.Result;
+                        location.href = "/Home/Index";
+                    } else {
+                        alert(data.Msg);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

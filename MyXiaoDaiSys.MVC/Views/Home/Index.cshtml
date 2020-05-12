@@ -1,0 +1,124 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+</head>
+<body>
+    <a href="/Student/Add">添加</a>
+    <div class="container">
+        @*查询*@
+        <table class="table">
+            <tr>
+                <td>
+                    姓名:<input id="Name" type="text" />
+                    电话:<input id="Tel" type="text" />
+                    <input id="Button1" type="button" value="查询" onclick="loadData(1)" />
+                </td>
+            </tr>
+        </table>
+        @*数据列表*@
+        <table class="table">
+            <thead>
+                <tr>
+                    <td> 编号</td>
+                    <td> 姓名</td>
+                    <td> 年龄</td>
+                    <td> 电话</td>
+                    <td> 邮件</td>
+                </tr>
+            </thead>
+            <tbody id="tb"></tbody>
+        </table>
+        @*分页*@
+        <table class="table">
+            <tr>
+                <td><a href="#" onclick="First()">首页</a></td>
+                <td><a href="#" onclick="Prev()">上一页</a></td>
+                <td><a href="#" onclick="Next()">下一页</a></td>
+                <td><a href="#" onclick="Last()">末页</a></td>
+                <td>共<span id="totalRecord"></span>条记录</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var currentIndex = 1;
+        var TotalPage = 1;
+        function loadData(index) {
+            var obj = { PageIndex: index, PageSize: 3 };
+            var name = $("#Name").val();
+            var tel = $("#Tel").val();
+            if (name != "") {
+                obj.Name = name;
+            }
+            if (tel != "") {
+                obj.Tel = tel;
+            }
+
+            $.ajax({
+                url: 'http://localhost:55379/api/Student/GetPage',
+                data: obj,
+                type: 'get',
+                dataType: 'json',
+                headers: { "MyAuth": localStorage["user"] },
+                success: function (data) {
+                    if (data.Code != 0) {
+                        alert(data.Msg);
+                        return;
+                    }
+
+                    $("#tb").empty();
+                    $(data.Result.Data).each(function () {
+                        $("#tb").append(
+                            " <tr>" +
+                            "    <td> " + this.Id + "</td>" +
+                            "    <td> " + this.Name + "</td>" +
+                            "    <td> " + this.Age + "</td>" +
+                            "    <td> " + this.Tel + "</td>" +
+                            "    <td> " + this.Email + "</td>" +
+                            "</tr>"
+                        );
+                    });
+                    TotalPage = data.TotalPage;
+                    $("#totalRecord").html(data.TotalRecord)
+                }
+            });
+
+        }
+
+        function First() {
+            currentIndex = 1;
+            loadData(currentIndex);
+        }
+
+        function Prev() {
+            currentIndex--;
+            if (currentIndex < 1) currentIndex = 1;
+            loadData(currentIndex);
+        }
+
+        function Next() {
+            currentIndex++;
+            if (currentIndex > TotalPage) currentIndex = TotalPage;
+            loadData(currentIndex);
+        }
+
+        function Last() {
+            currentIndex = TotalPage;
+            loadData(currentIndex);
+        }
+
+        loadData(1);
+    </script>
+</body>
+</html>
